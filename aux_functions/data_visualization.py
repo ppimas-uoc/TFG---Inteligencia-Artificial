@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -76,12 +77,11 @@ def viz_attr_histogram(df, variable, target='QoL'):
 
 
 def viz_dispersion(df):
-    df_no_id = df.drop('id', axis=1)
-    unique_counts = df_no_id.nunique()
+    unique_counts = df.nunique()
 
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16, 6))
 
-    sns.boxplot(data=df_no_id, ax=axes[0], palette='viridis')
+    sns.boxplot(data=df, ax=axes[0], palette='viridis')
     axes[0].set_title("Dispersion", fontsize=14)
     axes[0].set_xticklabels(axes[0].get_xticklabels(), rotation=90)
 
@@ -131,12 +131,10 @@ def viz_single_variable(df, column, target='QoL'):
     axes[1].set_xticklabels([])
     axes[1].set_ylabel(column, fontsize=10)
 
-    # Crear otra barra de color asociada a QoL en el eje del boxplot
-    # (horizontal, debajo del gráfico)
     norm2 = colors.Normalize(vmin=val_min, vmax=val_max)
     sm2 = cm.ScalarMappable(cmap='viridis', norm=norm2)
     sm2.set_array([])
-    cbar_right = plt.colorbar(sm2, ax=axes[1], orientation='horizontal')
+    cbar_right = plt.colorbar(sm2, ax=axes[1], orientation='horizontal', pad=0.01)
     cbar_right.set_label(target)
     cbar_right.set_ticks([val_min, val_max])
     cbar_right.set_ticklabels([f"{val_min:.2f}", f"{val_max:.2f}"])
@@ -151,3 +149,39 @@ def viz_single_variable(df, column, target='QoL'):
     print('')
     stats_table = df.groupby(target)[column].describe()
     display(stats_table)
+
+from itertools import combinations
+def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
+    # Filtrar y_vars para que no incluya x_var
+    pairs = list(combinations(df.columns.tolist(), 2))
+    n_pairs = len(pairs)
+    n_rows = math.ceil(n_pairs / n_cols)
+
+    fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(fig_width * n_cols, fig_height * n_rows))
+
+    # Asegurarse de que axes es un array plano
+    if n_pairs == 1:
+        axes = [axes]
+    else:
+        axes = axes.flatten()
+
+    for idx, (x_var, y_var) in enumerate(pairs):
+        ax = axes[idx]
+        sub_df = df[[x_var, y_var]].dropna().sort_values(x_var)
+        if hue_var:
+            sns.lineplot(data=sub_df, x=x_var, y=y_var, hue=sub_df[hue_var],
+                         ax=ax, palette='viridis')
+        else:
+            sns.lineplot(data=sub_df, x=x_var, y=y_var, ax=ax, palette='viridis')
+
+        ax.set_title(f"{y_var} vs {x_var}", fontsize=18)
+        ax.set_xlabel(x_var, fontsize=16)
+        ax.set_ylabel(y_var, fontsize=16)
+        ax.tick_params(axis='both', labelsize=12)
+
+    # Ocultar subplots sobrantes, si hay
+    for j in range(idx + 1, len(axes)):
+        axes[j].set_visible(False)
+
+    plt.tight_layout()
+    plt.show()
