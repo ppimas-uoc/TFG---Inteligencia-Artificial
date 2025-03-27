@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 import math
-
+from itertools import combinations
 
 # Graficar la distribución de todas las variables del dataframe
 def viz_columns_distribution(df: pd.DataFrame):
@@ -150,7 +150,6 @@ def viz_single_variable(df, column, target='QoL'):
     stats_table = df.groupby(target)[column].describe()
     display(stats_table)
 
-from itertools import combinations
 def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
     # Filtrar y_vars para que no incluya x_var
     pairs = list(combinations(df.columns.tolist(), 2))
@@ -181,6 +180,42 @@ def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
 
     # Ocultar subplots sobrantes, si hay
     for j in range(idx + 1, len(axes)):
+        axes[j].set_visible(False)
+
+    plt.tight_layout()
+    plt.show()
+
+
+def viz_distributions_by_target(df, target, ncols=3):
+    """
+    Muestra en una grilla los histogramas de todas las variables (excepto la variable target)
+    coloreados según target.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame con los datos.
+    target : str
+        Nombre de la variable objetivo que se usará como hue.
+    ncols : int, optional
+        Número de columnas de la grilla. Por defecto es 3.
+    """
+    # Crear la lista de variables a graficar (excluyendo el target)
+    variables = [col for col in df.columns if col != target]
+    n = len(variables)
+    nrows = math.ceil(n / ncols)
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols*5, nrows*4))
+    axes = axes.flatten()  # para recorrerlos en un loop
+
+    for i, var in enumerate(variables):
+        sns.histplot(data=df, x=var, hue=target, palette='viridis', kde=True, ax=axes[i])
+        axes[i].set_title(f"Distribution of {var}", fontsize=14)
+        axes[i].set_xlabel(var, fontsize=12)
+        axes[i].set_ylabel("Count", fontsize=12)
+
+    # Ocultar subplots sobrantes
+    for j in range(i+1, len(axes)):
         axes[j].set_visible(False)
 
     plt.tight_layout()
