@@ -103,7 +103,7 @@ def viz_dispersion(df):
 
 
 def viz_single_variable(df, column, target='QoL'):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16, 4))
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(16, 4))
     sns.histplot(
         data=df,
         x=column,
@@ -111,6 +111,8 @@ def viz_single_variable(df, column, target='QoL'):
         palette='viridis',
         multiple='fill',
         legend=False,
+        bins=len(df[column].unique()),
+        shrink=1,
         ax=axes[0]
     )
     if axes[0].legend_:
@@ -121,26 +123,31 @@ def viz_single_variable(df, column, target='QoL'):
     sm = cm.ScalarMappable(cmap='viridis', norm=norm)
     sm.set_array([])
     cbar_left = plt.colorbar(sm, ax=axes[0])
-    cbar_left.set_label(target)
+    cbar_left.set_label(target, labelpad=-35)
     cbar_left.set_ticks([val_min, val_max])
     cbar_left.set_ticklabels([f"{val_min:.2f}", f"{val_max:.2f}"])
-    axes[0].set_title(f"Distribution of {column} by {target}", fontsize=12)
+    axes[0].set_title(f"Proportion of {target} by {column} values", fontsize=12)
     axes[0].set_xlabel(column, fontsize=10)
     axes[0].set_ylabel("Proportion", fontsize=10)
-
-    sns.boxplot(data=df, x=target, y=column, ax=axes[1])
-    axes[1].set_title(f"{column} vs {target}", fontsize=12)
-    axes[1].set_xlabel('')
-    axes[1].set_xticklabels([])
-    axes[1].set_ylabel(column, fontsize=10)
 
     norm2 = colors.Normalize(vmin=val_min, vmax=val_max)
     sm2 = cm.ScalarMappable(cmap='viridis', norm=norm2)
     sm2.set_array([])
     cbar_right = plt.colorbar(sm2, ax=axes[1], orientation='horizontal', pad=0.01)
-    cbar_right.set_label(target)
+    cbar_right.set_label(target, labelpad=-10)
     cbar_right.set_ticks([val_min, val_max])
     cbar_right.set_ticklabels([f"{val_min:.2f}", f"{val_max:.2f}"])
+    sns.boxplot(data=df, x=target, y=column, ax=axes[1])
+    axes[1].set_title(f"Distribution of {column} by {target} values", fontsize=12)
+    axes[1].set_xlabel('')
+    axes[1].set_xticklabels([])
+    axes[1].set_ylabel(column, fontsize=10)
+
+    sns.ecdfplot(data=df, x=column, ax=axes[2], palette='viridis', legend=False)
+    axes[2].set_title(f"Cumulative distribution of {column}", fontsize=12)
+    axes[2].set_xlabel(column, fontsize=10)
+    axes[2].set_ylabel("Proportion", fontsize=10)
+
 
     plt.tight_layout()
     sns.despine()
@@ -150,7 +157,23 @@ def viz_single_variable(df, column, target='QoL'):
     print('')
     print(f"Statistics for {column} by {target} values:")
     print('')
+
+    def count_outliers(series):
+        q1 = series.quantile(0.25)
+        q3 = series.quantile(0.75)
+        iqr = q3 - q1
+        lower = q1 - 1.5 * iqr
+        upper = q3 + 1.5 * iqr
+        outliers = series[(series < lower) | (series > upper)]
+        return outliers.count(), np.sort(np.round(outliers.dropna().unique(), 2))
+
+    grouped = df.groupby(target)[column]
+    outliers_info = grouped.apply(count_outliers)
     stats_table = df.groupby(target)[column].describe()
+    stats_table['Outliers Count'] = outliers_info.apply(lambda x: x[0])
+    stats_table['Outliers'] = outliers_info.apply(lambda x: x[1])
+    skew_values = grouped.apply(lambda x: x.skew()).rename('skew')
+    stats_table = stats_table.join(skew_values)
     display(stats_table)
 
 def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
