@@ -21,7 +21,7 @@ def viz_columns_distribution(df: pd.DataFrame):
     axes = axes.flatten()
 
     for i, col in enumerate(cols):
-        sns.histplot(data=df, x=col, kde=True, ax=axes[i], palette='viridis')
+        sns.histplot(data=df, x=col, ax=axes[i], kde=True)
         sns.despine()
         axes[i].set_title(col, fontsize=16)
         axes[i].set_xlabel('')
@@ -30,6 +30,7 @@ def viz_columns_distribution(df: pd.DataFrame):
         fig.delaxes(axes[j])
 
     plt.tight_layout()
+    sns.despine()
     plt.subplots_adjust(hspace=0.5)
     plt.show()
 
@@ -42,7 +43,7 @@ def viz_missing_values(df):
     """
     null_counts = df.isnull().sum()
     plt.figure(figsize=(12, 3))
-    sns.barplot(x=null_counts.index, y=null_counts.values, palette='viridis')
+    sns.barplot(x=null_counts.index, y=null_counts.values)
     sns.despine()
     plt.xticks(rotation=90)
     plt.ylabel('Number of Null Values')
@@ -73,6 +74,7 @@ def viz_attr_histogram(df, variable, target='QoL'):
     cbar.set_ticks([qol_min, qol_max])
     cbar.set_ticklabels([f"{qol_min:.2f}", f"{qol_max:.2f}"])
     plt.title("Histogram of Physical functioning by QoL")
+    sns.despine()
     plt.show()
 
 
@@ -81,13 +83,13 @@ def viz_dispersion(df):
 
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16, 6))
 
-    sns.boxplot(data=df, ax=axes[0], palette='viridis')
+    sns.boxplot(data=df, ax=axes[0])
     axes[0].set_title("Dispersion", fontsize=14)
     axes[0].set_xticklabels(axes[0].get_xticklabels(), rotation=90)
 
     sns.despine(ax=axes[0])
 
-    sns.lineplot(x=unique_counts.index, y=unique_counts.values, marker='o', ax=axes[1], palette='viridis')
+    sns.lineplot(x=unique_counts.index, y=unique_counts.values, marker='o', ax=axes[1])
     axes[1].set_title('Unique Values', fontsize=14)
     axes[1].set_xticklabels(axes[1].get_xticklabels(), rotation=90)
 
@@ -95,6 +97,7 @@ def viz_dispersion(df):
     sns.despine(ax=axes[1])
 
     plt.tight_layout()
+    sns.despine()
     plt.subplots_adjust(wspace=0.1)
     plt.show()
 
@@ -151,14 +154,12 @@ def viz_single_variable(df, column, target='QoL'):
     display(stats_table)
 
 def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
-    # Filtrar y_vars para que no incluya x_var
     pairs = list(combinations(df.columns.tolist(), 2))
     n_pairs = len(pairs)
     n_rows = math.ceil(n_pairs / n_cols)
 
     fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(fig_width * n_cols, fig_height * n_rows))
 
-    # Asegurarse de que axes es un array plano
     if n_pairs == 1:
         axes = [axes]
     else:
@@ -169,44 +170,30 @@ def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
         sub_df = df[[x_var, y_var]].dropna().sort_values(x_var)
         if hue_var:
             sns.lineplot(data=sub_df, x=x_var, y=y_var, hue=sub_df[hue_var],
-                         ax=ax, palette='viridis')
+                         ax=ax)
         else:
-            sns.lineplot(data=sub_df, x=x_var, y=y_var, ax=ax, palette='viridis')
+            sns.lineplot(data=sub_df, x=x_var, y=y_var, ax=ax)
 
         ax.set_title(f"{y_var} vs {x_var}", fontsize=18)
         ax.set_xlabel(x_var, fontsize=16)
         ax.set_ylabel(y_var, fontsize=16)
         ax.tick_params(axis='both', labelsize=12)
 
-    # Ocultar subplots sobrantes, si hay
     for j in range(idx + 1, len(axes)):
         axes[j].set_visible(False)
 
     plt.tight_layout()
+    sns.despine()
     plt.show()
 
 
 def viz_distributions_by_target(df, target, ncols=3):
-    """
-    Muestra en una grilla los histogramas de todas las variables (excepto la variable target)
-    coloreados según target.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame con los datos.
-    target : str
-        Nombre de la variable objetivo que se usará como hue.
-    ncols : int, optional
-        Número de columnas de la grilla. Por defecto es 3.
-    """
-    # Crear la lista de variables a graficar (excluyendo el target)
     variables = [col for col in df.columns if col != target]
     n = len(variables)
     nrows = math.ceil(n / ncols)
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols*5, nrows*4))
-    axes = axes.flatten()  # para recorrerlos en un loop
+    axes = axes.flatten()
 
     for i, var in enumerate(variables):
         sns.histplot(data=df, x=var, hue=target, palette='viridis', kde=True, ax=axes[i])
@@ -214,9 +201,9 @@ def viz_distributions_by_target(df, target, ncols=3):
         axes[i].set_xlabel(var, fontsize=12)
         axes[i].set_ylabel("Count", fontsize=12)
 
-    # Ocultar subplots sobrantes
     for j in range(i+1, len(axes)):
         axes[j].set_visible(False)
 
     plt.tight_layout()
+    sns.despine()
     plt.show()
