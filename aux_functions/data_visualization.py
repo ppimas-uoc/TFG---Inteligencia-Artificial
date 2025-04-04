@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
+import matplotlib.patches as mpatches
 import math
 from itertools import combinations
 
@@ -217,15 +218,30 @@ def viz_distributions_by_target(df, target, ncols=3):
 
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(ncols*5, nrows*4))
     axes = axes.flatten()
-
     for i, var in enumerate(variables):
-        sns.histplot(data=df, x=var, hue=target, palette='viridis', kde=True, ax=axes[i])
-        axes[i].set_title(f"Distribution of {var}", fontsize=14)
+        sns.histplot(
+            data=df,
+            x=var,
+            hue=target,
+            palette='viridis',
+            multiple='fill',
+            legend= (i==0),
+            bins=len(df[var].unique()),
+            shrink=1,
+            ax=axes[i]
+        )
+        axes[i].set_title(f"Proportion of {target} by {var} values", fontsize=14)
         axes[i].set_xlabel(var, fontsize=12)
-        axes[i].set_ylabel("Count", fontsize=12)
+        axes[i].set_ylabel("Proportion", fontsize=12)
 
-    for j in range(i+1, len(axes)):
+    for j in range(len(variables), len(axes)):
         axes[j].set_visible(False)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    leg = fig.legend(handles, labels, loc='upper right', frameon=True)
+    leg.get_frame().set_facecolor('white')
+    leg.get_frame().set_edgecolor('black')
+    fig.legend(handles, labels, loc='upper right')
 
     plt.tight_layout()
     sns.despine()
