@@ -8,6 +8,10 @@ import matplotlib.patches as mpatches
 import math
 from itertools import combinations
 
+from numpy.core.defchararray import upper
+from pandas import DataFrame, Series
+
+
 # Graficar la distribución de todas las variables del dataframe
 def viz_columns_distribution(df: pd.DataFrame):
     """
@@ -246,3 +250,44 @@ def viz_distributions_by_target(df, target, ncols=3):
     plt.tight_layout()
     sns.despine()
     plt.show()
+
+
+def viz_split_distributions(y_list: [Series], split_names: [str]):
+    data = []
+    split_names = [f"{name} ({len(y)})" for name, y in zip(split_names, y_list)]
+    for i, y in enumerate(y_list):
+        proportions = y.value_counts(normalize=True).sort_index()
+        for clase, prop in proportions.items():
+            data.append({
+                'Split': split_names[i],
+                'Class': clase,
+                'Proportion': prop
+            })
+
+    df_props = pd.DataFrame(data)
+
+    df_pivot = df_props.pivot(index='Split', columns='Class', values='Proportion').fillna(0)
+
+    df_pivot = df_pivot.reindex(split_names)
+
+    n_clases = df_pivot.shape[1]
+    palette = sns.color_palette("viridis", n_clases)
+
+    ax = df_pivot.plot(
+        kind='bar',
+        stacked=True,
+        color=palette,
+        figsize=(1.5*len(split_names)+6, 5)
+    )
+
+    ax.set_title("Proportion of Each QoL Class in y datasets", fontsize=14)
+    ax.set_ylabel("Proportion", fontsize=12)
+    ax.set_xlabel("")
+    ax.legend(title="QoL", bbox_to_anchor=(1.01, 1), loc="upper left")
+    plt.xticks(rotation=0)
+
+    plt.tight_layout()
+    sns.despine()
+    plt.show()
+
+
