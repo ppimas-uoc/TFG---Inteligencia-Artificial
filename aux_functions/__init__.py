@@ -6,6 +6,7 @@ from .data_visualization import (
     viz_dispersion,
     viz_single_variable,
     viz_single_vs_all,
-    viz_distributions_by_target
+    viz_distributions_by_target,
+    viz_split_distributions
 )
 
