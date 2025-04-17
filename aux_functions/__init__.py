@@ -17,4 +17,9 @@ from .data_visualization import (
     viz_pdp_pairs
 )
 from .modelling import tune_thresholds
+from .xai import (
+    single_prediction,
+    show_random_false_prediction,
+    show_lime
+)
 
