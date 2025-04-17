@@ -4,15 +4,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
-import matplotlib.patches as mpatches
 import math
 from itertools import combinations
+from sklearn.metrics import confusion_matrix, roc_curve
 
-from numpy.core.defchararray import upper
-from pandas import DataFrame, Series
+from sklearn.metrics import classification_report, roc_auc_score, accuracy_score, precision_score, recall_score, \
+    f1_score, make_scorer
+from sklearn.model_selection import TunedThresholdClassifierCV
 
 
-# Graficar la distribución de todas las variables del dataframe
 def viz_columns_distribution(df: pd.DataFrame):
     """
     Visualizes the distribution of columns present in a DataFrame.
@@ -252,42 +252,161 @@ def viz_distributions_by_target(df, target, ncols=3):
     plt.show()
 
 
-def viz_split_distributions(y_list: [Series], split_names: [str]):
+def viz_split_distributions(y_list: [pd.Series], split_names: [str]):
     data = []
-    split_names = [f"{name} ({len(y)})" for name, y in zip(split_names, y_list)]
-    for i, y in enumerate(y_list):
-        proportions = y.value_counts(normalize=True).sort_index()
-        for clase, prop in proportions.items():
+    for name, y in zip(split_names, y_list):
+        props = y.value_counts(normalize=True).sort_index()
+        for clase, val in props.items():
             data.append({
-                'Split': split_names[i],
+                'Split': f"{name} ({len(y)})",
                 'Class': clase,
-                'Proportion': prop
+                'Proportion': val
             })
-
     df_props = pd.DataFrame(data)
-
     df_pivot = df_props.pivot(index='Split', columns='Class', values='Proportion').fillna(0)
 
-    df_pivot = df_pivot.reindex(split_names)
-
-    n_clases = df_pivot.shape[1]
-    palette = sns.color_palette("viridis", n_clases)
-
-    ax = df_pivot.plot(
-        kind='bar',
-        stacked=True,
-        color=palette,
-        figsize=(1.5*len(split_names)+6, 5)
-    )
+    palette = sns.color_palette("viridis", df_pivot.shape[1])
+    ax = df_pivot.plot(kind='bar', stacked=True, color=palette, figsize=(1.5*len(y_list)+6, 5))
 
     ax.set_title("Proportion of Each QoL Class in y datasets", fontsize=14)
     ax.set_ylabel("Proportion", fontsize=12)
     ax.set_xlabel("")
-    ax.legend(title="QoL", bbox_to_anchor=(1.01, 1), loc="upper left")
+    ax.legend(title="QoL", bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=10)
     plt.xticks(rotation=0)
+
+    xticks = ax.get_xticks()
+    for i, split in enumerate(df_pivot.index):
+        bottom = 0
+        for clase in df_pivot.columns:
+            val = df_pivot.loc[split, clase]
+            if val > 0:
+                ax.text(
+                    xticks[i],
+                    bottom + val/2,
+                    f"{val*100:.1f}%",
+                    ha="center",
+                    va="center",
+                    fontsize=12,
+                    color="black"
+                )
+            bottom += val
 
     plt.tight_layout()
     sns.despine()
     plt.show()
+
+
+
+def viz_classification_reports(model, X_train, y_train, X_val, y_val, val='validation'):
+    y_pred_train = model.predict(X_train)
+    report_train = classification_report(y_train, y_pred_train, output_dict=True)
+    print("Reporte sobre el conjunto de ENTRENAMIENTO:")
+    print(classification_report(y_train, y_pred_train))
+
+    y_pred_val = model.predict(X_val)
+    report_val = classification_report(y_val, y_pred_val, output_dict=True)
+    print(f"Reporte sobre el conjunto de {val}: ", val.upper())
+    print(classification_report(y_val, y_pred_val))
+
+    reports = {
+        "entrenamiento": report_train,
+        f"{val}": report_val,
+    }
+
+    ds_names = list(reports.keys())
+    metrics = ['precision', 'recall', 'f1-score']
+    classes = [key for key in report_train.keys() if key not in ['accuracy', 'macro avg', 'weighted avg']]
+
+    plot_data = {metric: {cls: [] for cls in classes} for metric in metrics}
+    for ds in ds_names:
+        for cls in classes:
+            for metric in metrics:
+                plot_data[metric][cls].append(reports[ds][cls][metric])
+
+    plt.figure(figsize=(15, 5))
+    for i, metric in enumerate(metrics):
+        plt.subplot(1, 3, i+1)
+        for cls in classes:
+            plt.plot(ds_names, plot_data[metric][cls], marker='o', label=f'Clase {cls}')
+        plt.xlabel("Conjunto", fontsize=12)
+        plt.ylabel(metric.capitalize(), fontsize=12)
+        plt.title(f"{metric.capitalize()} por clase en cada conjunto", fontsize=14)
+        plt.legend(loc='best', fontsize=10)
+        plt.grid(True)
+    plt.tight_layout()
+    sns.despine()
+    plt.show()
+
+    return y_pred_train, y_pred_val
+
+def viz_confusion_matrix_thres(labels, y_val, y_pred_val, y_pred_thres):
+    cm_val = confusion_matrix(y_val, y_pred_val)
+    cm_thres = confusion_matrix(y_val, y_pred_thres)
+    matrices = [("Validación", cm_val), ("Validación Ajustada", cm_thres)]
+
+    fig, axes = plt.subplots(1, ncols = 2, figsize=(12, 5))
+
+    for ax, (title, cm) in zip(axes, matrices):
+        sns.heatmap(cm, annot=True, fmt='d', cmap='viridis',
+                    xticklabels=labels, yticklabels=labels,
+                    ax=ax)
+        ax.set_title(title, fontsize=14)
+        ax.set_xlabel("QoL Predicha", fontsize=12)
+        ax.set_ylabel("QoL Verdadera", fontsize=12)
+
+    plt.tight_layout()
+    plt.show()
+
+def viz_confusion_matrix_test(labels, y_true, y_pred):
+    cm = confusion_matrix(y_true, y_pred)
+
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='viridis',
+                xticklabels=labels, yticklabels=labels)
+    plt.title("Matriz de confusión - Test", fontsize=14)
+    plt.xlabel("QoL Predicha", fontsize=12)
+    plt.ylabel("QoL Verdadera", fontsize=12)
+    plt.tight_layout()
+    plt.show()
+
+def viz_threshold_behavior(model, X_val, y_val, num_thresholds=20):
+    scoring = make_scorer(f1_score)
+    tuned_clf = TunedThresholdClassifierCV(model, cv="prefit", refit=False, scoring=scoring)
+    tuned_clf.fit(X_val, y_val)
+    best_threshold = tuned_clf.best_threshold_
+    best_score = tuned_clf.best_score_
+
+    y_pred_proba = model.predict_proba(X_val)[:, 1]
+    roc_auc = roc_auc_score(y_val, y_pred_proba)
+
+    thresholds = np.linspace(0, 1, num_thresholds)
+    metrics = []
+    for t in thresholds:
+        y_pred = (y_pred_proba >= t).astype(int)
+        acc = accuracy_score(y_val, y_pred)
+        prec = precision_score(y_val, y_pred, zero_division=0)
+        rec = recall_score(y_val, y_pred)
+        f1 = f1_score(y_val, y_pred)
+        metrics.append((t, acc, prec, rec, f1))
+
+    df_metrics = pd.DataFrame(metrics, columns=['Threshold', 'Accuracy', 'Precision', 'Recall', 'F1-score'])
+
+    plt.figure(figsize=(12, 6))
+    palette = sns.color_palette('viridis', n_colors=4)
+    for col, color in zip(['Accuracy', 'Precision', 'Recall', 'F1-score'], palette):
+        plt.plot(df_metrics['Threshold'], df_metrics[col], color=color, lw=2, label=col)
+        plt.scatter(df_metrics['Threshold'], df_metrics[col], color=color, s=50, lw=1.5, edgecolor='white', zorder=12)
+    plt.xticks(np.arange(0, 1.1, 0.1))
+    plt.plot(best_threshold, best_score, marker=3, markersize=10, color="#D55E00", label=f"F1 score óptimo con umbral = {best_threshold:.3f}")
+    plt.plot([], [], ' ', label=f'ROC AUC: {roc_auc:.3f}')
+    plt.legend(loc='lower left', ncol=3, fontsize=12)
+    plt.title("Comportamiento del modelo por umbral de decisión", fontsize=14)
+    plt.xlabel("Umbral de decisión", fontsize=12)
+    plt.ylabel("Puntaje", fontsize=12)
+    plt.tight_layout(pad=1)
+    sns.despine()
+    plt.show()
+
+    return best_threshold, df_metrics
 
 

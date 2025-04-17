@@ -7,6 +7,11 @@ from .data_visualization import (
     viz_single_variable,
     viz_single_vs_all,
     viz_distributions_by_target,
-    viz_split_distributions
+    viz_split_distributions,
+    viz_classification_reports,
+    viz_confusion_matrix_thres,
+    viz_confusion_matrix_test,
+    viz_threshold_behavior
 )
+from .modelling import tune_thresholds
 
