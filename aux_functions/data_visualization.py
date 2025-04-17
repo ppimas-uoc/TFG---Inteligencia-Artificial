@@ -6,6 +6,8 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 import math
 from itertools import combinations
+
+from sklearn.inspection import PartialDependenceDisplay
 from sklearn.metrics import confusion_matrix, roc_curve
 
 from sklearn.metrics import classification_report, roc_auc_score, accuracy_score, precision_score, recall_score, \
@@ -409,4 +411,103 @@ def viz_threshold_behavior(model, X_val, y_val, num_thresholds=20):
 
     return best_threshold, df_metrics
 
+def viz_feature_importance(sorted_feat_imp: zip):
+    sorted_features, sorted_importances = zip(*sorted_feat_imp)
 
+    functioning = [
+        'Physical functioning', 'Role functioning', 'Emotional functioning',
+        'Cognitive functioning', 'Social functioning', 'Sexual functioning'
+    ]
+
+    symptoms = [
+        'Fatigue', 'Nausea and vomiting', 'Pain', 'Dyspnea', 'Insomnia',
+        'Appetite loss', 'Constipation', 'Diarrhea',
+        'Arm symptoms', 'Breast symptoms', 'Systemic therapy side effects',
+    ]
+
+    def tipo_variable(col):
+        if col in functioning:
+            return "functioning"
+        elif col in symptoms:
+            return "symptom"
+        else:
+            return "other"
+
+    tipos = [tipo_variable(col) for col in sorted_features]
+    colors = {'functioning': '#66c2a5', 'symptom': '#fc8d62', 'other': '#8da0cb'}
+    bar_colors = [colors[t] for t in tipos]
+
+    plt.figure(figsize=(15, 5))
+    plt.barh(range(len(sorted_features)), sorted_importances, color=bar_colors)
+    plt.yticks(range(len(sorted_features)), sorted_features)
+    plt.xlabel("Importance")
+    plt.title("Feature Importance by variable type")
+
+    handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in colors.values()]
+    labels = list(colors.keys())
+    plt.legend(handles, labels, title="Type", loc="lower right")
+
+    plt.tight_layout()
+    sns.despine()
+    plt.show()
+
+def viz_pdp_single(model, X, kind='average', grid_resolution=101, n_cols=5):
+    features = X.columns.tolist()
+    n_features = len(features)
+    n_rows = -(-n_features // n_cols)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(4 * n_cols, 3 * n_rows))
+    axes = axes.flatten()
+
+    for i, feature in enumerate(features):
+        disp = PartialDependenceDisplay.from_estimator(
+            model,
+            X,
+            features=[feature],
+            kind=kind,
+            grid_resolution=grid_resolution,
+            ax=axes[i]
+        )
+        ax = disp.axes_[0, 0]
+        ax.set_ylim(0, 1)
+        ax.set_title(feature, fontsize=10)
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
+
+    titulo = "PDP + ICE para todas las variables" if kind == "both" else "PDP para todas las variables"
+    fig.suptitle(titulo, fontsize=16)
+    plt.tight_layout()
+    fig.subplots_adjust(top=0.93)
+    plt.show()
+
+
+def viz_pdp_pairs(model, X, features, kind='average', cols=2):
+    n = len(features)
+    rows = -(-n // cols)
+    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5 * rows))
+    axes = axes.flatten()
+
+    display = PartialDependenceDisplay.from_estimator(
+        model,
+        X,
+        features=features,
+        kind=kind,
+        random_state=73,
+        ax=axes[:n],
+    )
+
+    for ax in axes[:n]:
+        for coll in ax.collections:
+            if hasattr(coll, 'set_cmap'):
+                coll.set_cmap('viridis')
+
+    # Eliminar subplots vacíos si los hay
+    for i in range(n, len(axes)):
+        fig.delaxes(axes[i])
+
+    fig.suptitle("Gráficos PDP (2-way) por par de variables", fontsize=16)
+    plt.tight_layout()
+    fig.subplots_adjust(top=0.92)
+    plt.show()

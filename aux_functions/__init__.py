@@ -11,7 +11,10 @@ from .data_visualization import (
     viz_classification_reports,
     viz_confusion_matrix_thres,
     viz_confusion_matrix_test,
-    viz_threshold_behavior
+    viz_threshold_behavior,
+    viz_feature_importance,
+    viz_pdp_single,
+    viz_pdp_pairs
 )
 from .modelling import tune_thresholds
 
