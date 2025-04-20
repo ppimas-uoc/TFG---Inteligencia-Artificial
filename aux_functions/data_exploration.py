@@ -1,12 +1,28 @@
-# Inspeccionar una columna de un dataframe
+"""
+data_exploration.py
+
+Utility functions for inspecting and summarizing columns in pandas DataFrames.
+
+Includes:
+- inspect_column: detailed summary of a single column
+- inspect_all_columns: overview of all columns
+- rows_same_nulls: groups of columns with identical missing-value patterns
+
+Author: Pablo Pimàs Verge
+Created: 2025-04
+License: CC 3.0
+"""
 import pandas as pd
 import numpy as np
 
 def inspect_column(df: pd.DataFrame, column_name: str, max_unique: int = 50) -> pd.DataFrame:
     """
-    Returns a DataFrame with two columns ("Property" and "Value"). Each row contains
-    a piece of information about the specified column, such as data type, null counts,
-    duplicates, descriptive statistics, and a limited set of unique values.
+    Inspects a single column in a DataFrame and returns detailed statistics and characteristics.
+
+    :param df: The DataFrame containing the column.
+    :param column_name: Name of the column to inspect.
+    :param max_unique: Maximum number of unique values to display (default is 50).
+    :return: A DataFrame with statistical summary, nulls, unique values, and skewness.
     """
     col_data = df[column_name]
     data_type = col_data.dtype
@@ -46,12 +62,14 @@ def inspect_column(df: pd.DataFrame, column_name: str, max_unique: int = 50) -> 
     return df_result
 
 
-# Inspeccionar todas las columnas de un dataframe
+
 def inspect_all_columns(df: pd.DataFrame, max_unique: int = 50) -> pd.DataFrame:
     """
-    Creates a single DataFrame where each row corresponds to one column of 'df'
-    and each column of this resulting DataFrame is a property (dtype, null_count,
-    descriptive stats, etc.).
+    Inspects all columns of a DataFrame and summarizes their statistical properties.
+
+    :param df: The DataFrame to analyze.
+    :param max_unique: Maximum number of unique values to display per column (default is 50).
+    :return: A DataFrame summarizing dtype, null count, unique values, and skewness for each column.
     """
     rows = []
 
@@ -92,11 +110,13 @@ def inspect_all_columns(df: pd.DataFrame, max_unique: int = 50) -> pd.DataFrame:
     return df_result
 
 
-# Verificar columnas con las mismas filas nulas
+
 def rows_same_nulls(df: pd.DataFrame):
     """
-    Checks for columns with the same null rows to be deleted.
-    :param df: dataframe containing columns of interest
+    Detects columns that share the same pattern of missing values and prints them grouped.
+
+    :param df: The DataFrame to analyze for identical missing-value patterns.
+    :return: None. Outputs information to stdout.
     """
     missing_groups = {}
     for col in df.columns:

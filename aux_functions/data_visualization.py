@@ -1,3 +1,21 @@
+"""
+data_visualization.py
+
+Visualization utilities for exploratory data analysis, feature distribution,
+model interpretation, and performance reporting.
+
+Includes:
+- Distribution and dispersion plots
+- Histograms and ECDFs grouped by target
+- Partial Dependence Plots (PDP) and ICE plots
+- Feature importance (tree-based and permutation)
+- Classification reports and confusion matrices
+- Threshold tuning behavior visualization
+
+Author: Pablo Pimàs Verge
+Created: 2025-04
+License:CC 3.0
+"""
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -17,8 +35,10 @@ from sklearn.model_selection import TunedThresholdClassifierCV
 
 def viz_columns_distribution(df: pd.DataFrame):
     """
-    Visualizes the distribution of columns present in a DataFrame.
-    :param df: dataframe containing columns of interest
+    Plots the distribution (histograms with KDE) of all columns in the given DataFrame.
+
+    :param df: DataFrame containing numerical or categorical variables to visualize.
+    :return: None. Displays a grid of plots.
     """
     cols = df.columns
 
@@ -45,8 +65,10 @@ def viz_columns_distribution(df: pd.DataFrame):
 # Visualizar valores nulos del dataframe por columna
 def viz_missing_values(df):
     """
-    Visualizes missing values of columns present in a DataFrame.
-    :param df: dataframe containing columns of interest
+    Displays the number of missing values per column using a bar plot.
+
+    :param df: DataFrame to analyze for missing values.
+    :return: None. Shows a horizontal bar plot.
     """
     null_counts = df.isnull().sum()
     plt.figure(figsize=(12, 3))
@@ -59,6 +81,14 @@ def viz_missing_values(df):
 
 
 def viz_attr_histogram(df, variable, target='QoL'):
+    """
+    Plots the distribution of a single feature colored by the target class using a filled histogram.
+
+    :param df: DataFrame containing the data.
+    :param variable: Name of the feature to plot.
+    :param target: Target column used for hue and color bar.
+    :return: None. Displays the histogram and color scale.
+    """
     plt.figure(figsize=(8, 4))
     ax = sns.histplot(
         data=df,
@@ -86,6 +116,12 @@ def viz_attr_histogram(df, variable, target='QoL'):
 
 
 def viz_dispersion(df):
+    """
+    Plots boxplots of all columns and a line chart showing the number of unique values per column.
+
+    :param df: DataFrame with features to visualize.
+    :return: None. Displays two subplots.
+    """
     unique_counts = df.nunique()
 
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16, 6))
@@ -110,6 +146,14 @@ def viz_dispersion(df):
 
 
 def viz_single_variable(df, column, target='QoL'):
+    """
+    Generates three views for a single feature: histogram, boxplot and ECDF; grouped by target class.
+
+    :param df: DataFrame containing the data.
+    :param column: Feature column to analyze.
+    :param target: Name of the target column.
+    :return: None. Displays the plots and a summary stats table with outliers and skewness.
+    """
     fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(16, 4))
     sns.histplot(
         data=df,
@@ -184,6 +228,16 @@ def viz_single_variable(df, column, target='QoL'):
     display(stats_table)
 
 def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
+    """
+    Plots all pairwise lineplots between columns in the DataFrame.
+
+    :param df: DataFrame with features to analyze.
+    :param hue_var: Optional categorical variable used for coloring the lines.
+    :param n_cols: Number of columns in the subplot grid.
+    :param fig_width: Width of each subplot.
+    :param fig_height: Height of each subplot.
+    :return: None. Displays a grid of pairwise line plots.
+    """
     pairs = list(combinations(df.columns.tolist(), 2))
     n_pairs = len(pairs)
     n_rows = math.ceil(n_pairs / n_cols)
@@ -218,6 +272,14 @@ def viz_single_vs_all(df, hue_var=None, n_cols=4, fig_width=5, fig_height=4):
 
 
 def viz_distributions_by_target(df, target, ncols=3):
+    """
+    Plots filled histograms of all features, grouped by the specified target variable.
+
+    :param df: DataFrame containing the data.
+    :param target: Column name of the target variable.
+    :param ncols: Number of columns in the plot grid.
+    :return: None. Displays the histogram grid with proportion by class.
+    """
     variables = [col for col in df.columns if col != target]
     n = len(variables)
     nrows = math.ceil(n / ncols)
@@ -255,6 +317,13 @@ def viz_distributions_by_target(df, target, ncols=3):
 
 
 def viz_split_distributions(y_list: [pd.Series], split_names: [str]):
+    """
+    Displays a stacked bar plot showing the proportion of classes in each data split.
+
+    :param y_list: List of Series containing target values from each split.
+    :param split_names: List of names for each split (e.g. ['train', 'test', 'val']).
+    :return: None. Displays a stacked bar plot with class proportions and labels.
+    """
     data = []
     for name, y in zip(split_names, y_list):
         props = y.value_counts(normalize=True).sort_index()
@@ -300,6 +369,17 @@ def viz_split_distributions(y_list: [pd.Series], split_names: [str]):
 
 
 def viz_classification_reports(model, X_train, y_train, X_val, y_val, val='validation'):
+    """
+    Prints and plots classification report metrics (precision, recall, F1) by class for train and validation.
+
+    :param model: Trained classifier model with a `.predict()` method.
+    :param X_train: Training features.
+    :param y_train: Training target.
+    :param X_val: Validation features.
+    :param y_val: Validation target.
+    :param val: Label for the validation set.
+    :return: Tuple of predictions (y_pred_train, y_pred_val).
+    """
     y_pred_train = model.predict(X_train)
     report_train = classification_report(y_train, y_pred_train, output_dict=True)
     print("Reporte sobre el conjunto de ENTRENAMIENTO:")
@@ -342,6 +422,15 @@ def viz_classification_reports(model, X_train, y_train, X_val, y_val, val='valid
     return y_pred_train, y_pred_val
 
 def viz_confusion_matrix_thres(labels, y_val, y_pred_val, y_pred_thres):
+    """
+    Displays side-by-side confusion matrices for original and thresholded predictions.
+
+    :param labels: Class labels to annotate the matrix.
+    :param y_val: Ground truth target values.
+    :param y_pred_val: Predictions from model with default threshold.
+    :param y_pred_thres: Predictions with custom threshold.
+    :return: None. Displays two heatmaps.
+    """
     cm_val = confusion_matrix(y_val, y_pred_val)
     cm_thres = confusion_matrix(y_val, y_pred_thres)
     matrices = [("Validación", cm_val), ("Validación Ajustada", cm_thres)]
@@ -360,6 +449,14 @@ def viz_confusion_matrix_thres(labels, y_val, y_pred_val, y_pred_thres):
     plt.show()
 
 def viz_confusion_matrix_test(labels, y_true, y_pred):
+    """
+    Displays a confusion matrix for test set predictions.
+
+    :param labels: Class labels to annotate axes.
+    :param y_true: Ground truth values.
+    :param y_pred: Predicted values.
+    :return: None. Displays a single heatmap.
+    """
     cm = confusion_matrix(y_true, y_pred)
 
     plt.figure(figsize=(6, 5))
@@ -372,6 +469,15 @@ def viz_confusion_matrix_test(labels, y_true, y_pred):
     plt.show()
 
 def viz_threshold_behavior(model, X_val, y_val, num_thresholds=20):
+    """
+    Plots model performance metrics across different classification thresholds and shows the optimal one.
+
+    :param model: Trained classifier with predict_proba.
+    :param X_val: Validation features.
+    :param y_val: Validation labels.
+    :param num_thresholds: Number of threshold points to evaluate.
+    :return: Tuple (best_threshold, df_metrics) with optimal F1 threshold and full score DataFrame.
+    """
     scoring = make_scorer(f1_score)
     tuned_clf = TunedThresholdClassifierCV(model, cv="prefit", refit=False, scoring=scoring)
     tuned_clf.fit(X_val, y_val)
@@ -412,6 +518,12 @@ def viz_threshold_behavior(model, X_val, y_val, num_thresholds=20):
     return best_threshold, df_metrics
 
 def viz_feature_importance(sorted_feat_imp: zip):
+    """
+    Plots horizontal bar chart of feature importances with color-coded variable types.
+
+    :param sorted_feat_imp: Zip of (feature_name, importance) sorted from low to high.
+    :return: None. Displays the bar chart.
+    """
     sorted_features, sorted_importances = zip(*sorted_feat_imp)
 
     functioning = [
@@ -452,6 +564,16 @@ def viz_feature_importance(sorted_feat_imp: zip):
     plt.show()
 
 def viz_pdp_single(model, X, kind='average', grid_resolution=101, n_cols=5):
+    """
+    Plots individual Partial Dependence Plots (and ICE if requested) for all features.
+
+    :param model: Trained estimator.
+    :param X: Dataset used for PDP computation.
+    :param kind: 'average' for PDP, 'both' for PDP+ICE.
+    :param grid_resolution: Number of grid points used for plotting.
+    :param n_cols: Number of columns in the subplot grid.
+    :return: None. Displays the grid of PDPs.
+    """
     features = X.columns.tolist()
     n_features = len(features)
     n_rows = -(-n_features // n_cols)
@@ -484,6 +606,16 @@ def viz_pdp_single(model, X, kind='average', grid_resolution=101, n_cols=5):
 
 
 def viz_pdp_pairs(model, X, features, kind='average', cols=2):
+    """
+    Plots 2D PDP plots for selected feature pairs.
+
+    :param model: Trained model.
+    :param X: Dataset to compute PDPs on.
+    :param features: List of 2-tuples representing feature pairs.
+    :param kind: PDP plot kind, 'average' or 'both'.
+    :param cols: Number of columns in the plot grid.
+    :return: None. Displays PDP pair plots.
+    """
     n = len(features)
     rows = -(-n // cols)
     fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5 * rows))
