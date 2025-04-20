@@ -1,9 +1,32 @@
-import tempfile
+"""
+xai.py
+
+Utility functions for inspecting model predictions and visualizing local explanations.
+
+Includes:
+- single_prediction: prediction overview with threshold
+- show_random_false_prediction: pick and display a false negative or false positive
+- show_lime: export LIME explanation to HTML and open in browser
+
+Author: Pablo Pimàs Verge
+Created: 2025-04
+License: CC 3.0
+"""
 import webbrowser
-import os
 from pathlib import Path
 
 def single_prediction(model, model_thresholded, threshold, X, y, observation_idx):
+    """
+    Displays the prediction probability and class for a specific observation, both with and without threshold adjustment.
+
+    :param model: Trained model supporting predict_proba.
+    :param model_thresholded: Wrapper model that applies a custom decision threshold.
+    :param threshold: Threshold value used for classification.
+    :param X: Feature set (DataFrame).
+    :param y: Target variable (Series).
+    :param observation_idx: Index of the observation to inspect.
+    :return: None. Displays prediction info and the data row.
+    """
     obs = X.iloc[[observation_idx]]
     true_label = y.iloc[observation_idx]
     display(obs)
@@ -15,6 +38,18 @@ def single_prediction(model, model_thresholded, threshold, X, y, observation_idx
 
 
 def show_random_false_prediction(model, predictions, threshold, X_test, y_test, negative=True):
+    """
+    Displays a randomly selected false negative or false positive, showing its features, true label,
+    predicted probability, and adjusted prediction with threshold.
+
+    :param model: Trained model supporting predict_proba.
+    :param predictions: Array of predicted labels with threshold applied.
+    :param threshold: Decision threshold used in classification.
+    :param X_test: Test set features (DataFrame).
+    :param y_test: True target labels (Series).
+    :param negative: If True, search for false negatives. If False, search for false positives.
+    :return: Index of the selected sample, or None if no misclassifications found.
+    """
     error = "No false negatives found."
 
     if negative:
@@ -41,6 +76,13 @@ def show_random_false_prediction(model, predictions, threshold, X_test, y_test, 
 
 
 def show_lime(explanation, filename='lime_explanation.html'):
+    """
+    Saves a LIME explanation to an HTML file and opens it in the default browser.
+
+    :param explanation: LIME explanation object with as_html() method.
+    :param filename: Output filename (default: 'lime_explanation.html').
+    :return: None. Saves the file and attempts to open it.
+    """
     output_dir = Path('./lime_explanations')
     output_dir.mkdir(exist_ok=True)
 

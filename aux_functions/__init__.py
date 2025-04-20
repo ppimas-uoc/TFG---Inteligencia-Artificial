@@ -1,4 +1,8 @@
-from .data_exploration import inspect_column, inspect_all_columns, rows_same_nulls
+from .data_exploration import (
+    inspect_column,
+    inspect_all_columns,
+    rows_same_nulls
+)
 from .data_visualization import (
     viz_columns_distribution,
     viz_missing_values,
@@ -16,7 +20,6 @@ from .data_visualization import (
     viz_pdp_single,
     viz_pdp_pairs
 )
-from .modelling import tune_thresholds
 from .xai import (
     single_prediction,
     show_random_false_prediction,
