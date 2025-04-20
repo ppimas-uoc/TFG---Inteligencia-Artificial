@@ -24,12 +24,9 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 import math
 from itertools import combinations
-
 from sklearn.inspection import PartialDependenceDisplay
-from sklearn.metrics import confusion_matrix, roc_curve
-
 from sklearn.metrics import classification_report, roc_auc_score, accuracy_score, precision_score, recall_score, \
-    f1_score, make_scorer
+    f1_score, make_scorer, confusion_matrix
 from sklearn.model_selection import TunedThresholdClassifierCV
 
 
@@ -316,12 +313,13 @@ def viz_distributions_by_target(df, target, ncols=3):
     plt.show()
 
 
-def viz_split_distributions(y_list: [pd.Series], split_names: [str]):
+def viz_split_distributions(y_list: [pd.Series], split_names: [str], var_title: str):
     """
     Displays a stacked bar plot showing the proportion of classes in each data split.
 
     :param y_list: List of Series containing target values from each split.
     :param split_names: List of names for each split (e.g. ['train', 'test', 'val']).
+    :param: var_title: The variable to the title of the plot.
     :return: None. Displays a stacked bar plot with class proportions and labels.
     """
     data = []
@@ -339,7 +337,7 @@ def viz_split_distributions(y_list: [pd.Series], split_names: [str]):
     palette = sns.color_palette("viridis", df_pivot.shape[1])
     ax = df_pivot.plot(kind='bar', stacked=True, color=palette, figsize=(1.5*len(y_list)+6, 5))
 
-    ax.set_title("Proportion of Each QoL Class in y datasets", fontsize=14)
+    ax.set_title(f"Proportion of Each {var_title} Class in y datasets", fontsize=14)
     ax.set_ylabel("Proportion", fontsize=12)
     ax.set_xlabel("")
     ax.legend(title="QoL", bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=10)
@@ -419,7 +417,7 @@ def viz_classification_reports(model, X_train, y_train, X_val, y_val, val='valid
     sns.despine()
     plt.show()
 
-    return y_pred_train, y_pred_val
+    return y_pred_train, y_pred_val, report_val
 
 def viz_confusion_matrix_thres(labels, y_val, y_pred_val, y_pred_thres):
     """
@@ -642,4 +640,42 @@ def viz_pdp_pairs(model, X, features, kind='average', cols=2):
     fig.suptitle("Gráficos PDP (2-way) por par de variables", fontsize=16)
     plt.tight_layout()
     fig.subplots_adjust(top=0.92)
+    plt.show()
+
+
+def viz_model_comparison(reports_dict):
+    """
+    Plots three side-by-side bar charts (precision, recall, and F1-score) per class for each model.
+
+    Parameters:
+        reports_dict: dict
+            A dictionary where the keys are model names (str) and the values are classification reports
+            generated with sklearn.metrics.classification_report(..., output_dict=True).
+            Each report must include class-wise metrics with string class labels (e.g., '0.0', '1.0', '2.0').
+
+    Returns:
+        None. Displays the plots.
+    """
+    records = []
+    for model_name, report in reports_dict.items():
+        for cls in ['0.0', '1.0', '2.0']:  # ajusta según tus etiquetas
+            metrics = report[cls]
+            records.append({'Modelo': model_name, 'Clase': cls, 'Métrica': 'Precision', 'Valor': metrics['precision']})
+            records.append({'Modelo': model_name, 'Clase': cls, 'Métrica': 'Recall', 'Valor': metrics['recall']})
+            records.append({'Modelo': model_name, 'Clase': cls, 'Métrica': 'F1-score', 'Valor': metrics['f1-score']})
+
+    df = pd.DataFrame.from_records(records)
+
+    g = sns.catplot(
+        data=df, kind='bar',
+        x='Clase', y='Valor', hue='Modelo',
+        col='Métrica', col_order=['Precision', 'Recall', 'F1-score'],
+        height=4, aspect=1
+    )
+
+    g.set_titles('{col_name}')
+    g.set_axis_labels('Clase', 'Valor')
+    g.set(ylim=(0, 1))
+    g.despine(left=True)
+    plt.tight_layout()
     plt.show()

@@ -18,7 +18,8 @@ from .data_visualization import (
     viz_threshold_behavior,
     viz_feature_importance,
     viz_pdp_single,
-    viz_pdp_pairs
+    viz_pdp_pairs,
+    viz_model_comparison
 )
 from .xai import (
     single_prediction,
