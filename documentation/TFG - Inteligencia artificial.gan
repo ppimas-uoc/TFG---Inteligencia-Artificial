@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2025-03-10" view-index="0" gantt-divider-location="639" resource-divider-location="300" version="3.3.3316" locale="es_ES">
+    <description/>
+    <view zooming-state="default:6" id="gantt-chart">
+        <field id="tpd3" name="Nombre" width="368" order="0"/>
+        <field id="tpd4" name="Fecha de inicio" width="104" order="1"/>
+        <field id="tpd6" name="Duración" width="58" order="2"/>
+        <field id="tpd7" name="Progreso" width="92" order="3"/>
+        <option id="filter.completedTasks" value="false"/>
+        <option id="filter.dueTodayTasks" value="false"/>
+        <option id="filter.overdueTasks" value="false"/>
+        <option id="filter.inProgressTodayTasks" value="false"/>
+        <timeline><![CDATA[27,39]]></timeline>
+        <option id="color.recent"><![CDATA[#ff0066 #eeeeee #66ff66 #6666ff #ccff33 #ff33ff #3366ff #66ffff]]></option>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Nombre" width="209" order="0"/>
+        <field id="1" name="Función" width="85" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="0" mon="0" tue="0" wed="0" thu="0" fri="0" sat="0"/>
+            <only-show-weekends value="true"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="0" uid="a43687443f6d48638f444fdc762d91ce" name="Fase 0 - Propuesta de trabajo" color="#66ffff" meeting="false" start="2025-02-19" duration="13" complete="100" expand="true"/>
+        <task id="1" uid="5031567e509e4fa1af2dc40a672b6918" name="Investigación de la temática" meeting="false" start="2025-02-19" duration="4" complete="100" expand="true"/>
+        <task id="2" uid="f1d0fc2f09cf486cbd8f925b60ccf7c0" name="Búsqueda del conjunto de datos" meeting="false" start="2025-02-23" duration="5" complete="100" expand="true"/>
+        <task id="3" uid="5ab673384a1d4b86b9a254fb7e0cc7ca" name="Redacción de la propuesta" meeting="false" start="2025-02-28" duration="3" complete="100" priority="2" expand="true">
+            <depend id="4" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="4" uid="bec1a301cb514eb8ba5b0324eb34010c" name="Entrega PEC 0" color="#ff0066" meeting="true" start="2025-03-03" duration="0" complete="100" expand="true"/>
+        <task id="6" uid="5584343f14364831abc62c27061bd427" name="Fase 1 - Planificación del trabajo" color="#3366ff" meeting="false" start="2025-03-04" duration="15" complete="100" expand="true"/>
+        <task id="7" uid="154c5d4e50cd4dc9b32ea20855e233ec" name="Investigación de metodologías y estado del arte" meeting="false" start="2025-03-04" duration="4" complete="100" expand="true"/>
+        <task id="8" uid="def58556f2f04eba965b65e1baac2b3e" name="Definición de alcance y objetivos" meeting="false" start="2025-03-08" duration="3" complete="100" expand="true"/>
+        <task id="9" uid="f34148f6cc59450589fef792b61b65cb" name="Elaboración del cronograma de tareas" meeting="false" start="2025-03-11" duration="5" complete="100" expand="true"/>
+        <task id="10" uid="ec645f97c19d41c1a6c4503927bc3f4f" name="Redacción de la planificación" meeting="false" start="2025-03-16" duration="2" complete="100" expand="true">
+            <depend id="11" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="11" uid="64ef6e1f37504d26b751cd6da1f71866" name="Entrega PEC 1" color="#ff0066" meeting="true" start="2025-03-18" duration="0" complete="100" expand="true"/>
+        <task id="12" uid="5a71dfe52f864513879f9cf82820ebe9" name="Fase 2 - Preparación, modelado y evaluación" color="#ccff33" meeting="false" start="2025-03-19" duration="36" complete="1" expand="true"/>
+        <task id="13" uid="bc46c8e8df9047e1826b5bc8f1db9ac3" name="Preparación del entorno de trabajo" meeting="false" start="2025-03-19" duration="1" complete="50" expand="true">
+            <depend id="14" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="14" uid="d7eba3ba225a46b8bfde73bd9499bbff" name="Análisis exploratorio de datos" meeting="false" start="2025-03-20" duration="10" complete="0" expand="true"/>
+        <task id="15" uid="a9db032b7deb48afa81e1aa573e0516e" name="Preparación de los datos" meeting="false" start="2025-03-30" duration="4" complete="0" expand="true"/>
+        <task id="18" uid="7bb124aa80584251adab7bac4e4eaa0c" name="Entrenamiento de modelos" meeting="false" start="2025-04-03" duration="8" complete="0" expand="true">
+            <depend id="19" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="19" uid="a56c898bd58f46b29edd95cf85dd1916" name="Aplicación del modelo óptimo" meeting="false" start="2025-04-11" duration="3" complete="0" expand="true"/>
+        <task id="21" uid="1222e1c8a2cc45748b7ac34e3ecdd5fb" name="Investigación y documentación de métodos XAI" meeting="false" start="2025-04-14" duration="8" complete="0" expand="true"/>
+        <task id="22" uid="f0d7a3ee56ce47bbbe43aa472610d28f" name="Aplicación de métodos XAI al modelo" meeting="false" start="2025-04-16" duration="7" complete="0" expand="true"/>
+        <task id="23" uid="313c09675dfe4caf8f2311851ded233b" name="Redacción de informe de seguimiento" meeting="false" start="2025-04-19" duration="5" complete="0" expand="true">
+            <depend id="24" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="24" uid="7c7ef54d1fe044baad1d06aa412d23ac" name="Entrega PEC 2" color="#ff0066" meeting="true" start="2025-04-24" duration="0" complete="0" expand="true"/>
+        <task id="25" uid="0a2fc7b7eea741b8af89ca48da371c2b" name="Fase 3 - Evaluación, cuantificación de la incertidumbre" color="#ccff33" meeting="false" start="2025-04-24" duration="26" complete="0" expand="true"/>
+        <task id="26" uid="0672e97af0214c1ca9a1579efdb28b55" name="Aplicación de las correcciones del feedback PEC 2" meeting="false" start="2025-04-24" duration="7" complete="0" expand="true"/>
+        <task id="28" uid="f0ce2c9d3f664f36a112028ef0e13f17" name="Optimización de la explicabilidad del modelo" meeting="false" start="2025-04-26" duration="19" complete="0" expand="true"/>
+        <task id="29" uid="9c8e8bb1b58b46ffb771e24222a24468" name="Investigación y documentación de métodos UQ" meeting="false" start="2025-04-30" duration="11" complete="0" expand="true"/>
+        <task id="30" uid="c09c07ca2863476eb93f3f999544ae19" name="Cuantificación de la incertidumbre del modelo" meeting="false" start="2025-05-05" duration="11" complete="0" expand="true">
+            <depend id="32" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="32" uid="06dc85324f374620b7baba227ad27e84" name="Redacción del informe de seguimiento" meeting="false" start="2025-05-16" duration="4" complete="0" expand="true">
+            <depend id="33" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="33" uid="38fbb46444cc4f2db5d41395b93b3962" name="Entrega PEC 3" color="#ff0066" meeting="true" start="2025-05-20" duration="0" complete="0" expand="true"/>
+        <task id="34" uid="7520bcdcf27e483c8648b2b4b2350486" name="Fase 4 - Conslusiones y redacción de la memoria" color="#6666ff" meeting="false" start="2025-05-20" duration="20" complete="0" expand="true"/>
+        <task id="35" uid="3710769503a9477984d75ef2d416f9bd" name="Aplicación de las correcciones del feedback PEC 3" meeting="false" start="2025-05-20" duration="6" complete="0" expand="true"/>
+        <task id="36" uid="03d523be12ee4285b30198369bb0fb2d" name="Discusión y conclusiones del proyecto" meeting="false" start="2025-05-25" duration="7" complete="0" expand="true">
+            <depend id="38" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="38" uid="3f2b5222eae54070adedcd8309232023" name="Revisión y edición de la memoria" meeting="false" start="2025-06-01" duration="7" complete="0" expand="true">
+            <depend id="39" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="39" uid="f710ebc042bb4d9a97f98a50101630ea" name="Entrega PEC 4" color="#ff0066" meeting="true" start="2025-06-08" duration="0" complete="0" expand="true"/>
+        <task id="40" uid="040c1fa3d8b8407291e40cdebe755a3b" name="Fase 5a - Presentación de video" color="#ff0066" meeting="false" start="2025-06-09" duration="7" complete="0" expand="true"/>
+        <task id="41" uid="7a9ec2808c2644c6a6230f91a3e63ac3" name="Diseño y elaboración de contenido" meeting="false" start="2025-06-09" duration="4" complete="0" expand="true"/>
+        <task id="42" uid="bcd8e6ab121f41eeb9d62b8d5e155243" name="Producción del video" meeting="false" start="2025-06-11" duration="4" complete="0" expand="true">
+            <depend id="43" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="43" uid="69d6c4af7ab4409cbbacbc0efaaa45c6" name="Entrega PEC 5a" color="#ff0066" meeting="true" start="2025-06-15" duration="0" complete="0" expand="true"/>
+        <task id="44" uid="dc62240ed39442ea9c18a4133255d012" name="Fase 5b - Defensa pública" color="#ff0066" meeting="false" start="2025-06-16" duration="7" complete="0" expand="true"/>
+        <task id="45" uid="e78bccef4f174ac3840cff76dacc1075" name="Redacción del informe de autoevaluación" meeting="false" start="2025-06-16" duration="6" complete="0" expand="true">
+            <depend id="47" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="47" uid="43510393cb9e4aff8ace91135f2f6562" name="Entrega PEC 5b" color="#ff0066" meeting="true" start="2025-06-22" duration="0" complete="0" expand="true"/>
+        <task id="46" uid="6054c1dde0e546669fd8f4d818efc990" name="Defensa del trabajo" meeting="false" start="2025-06-22" duration="1" complete="0" expand="true"/>
+    </tasks>
+    <resources/>
+    <allocations/>
+    <vacations/>
+    <previous/>
+    <roles roleset-name="Default"/>
+</project>
