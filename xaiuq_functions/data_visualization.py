@@ -425,19 +425,22 @@ def viz_classification_reports(model, X_train, y_train, X_val, y_val, val='valid
 
     return y_pred_train, y_pred_val, report_val
 
-def viz_confusion_matrix_thres(labels, y_val, y_pred_val, y_pred_thres):
+def viz_confusion_matrix_thres(labels, y_true, y_pred_model_1, y_pred_model_2, tags=None):
     """
     Displays side-by-side confusion matrices for original and thresholded predictions.
 
     :param labels: Class labels to annotate the matrix.
-    :param y_val: Ground truth target values.
-    :param y_pred_val: Predictions from model with default threshold.
-    :param y_pred_thres: Predictions with custom threshold.
+    :param y_true: Ground truth target values.
+    :param y_pred_model_1: Predictions from model with default threshold.
+    :param y_pred_model_2: Predictions from same model with custom threshold or from other model to compare.
+    :param tags: List of tags to display on the side-by-side confusion matrix.
     :return: None. Displays two heatmaps.
     """
-    cm_val = confusion_matrix(y_val, y_pred_val)
-    cm_thres = confusion_matrix(y_val, y_pred_thres)
-    matrices = [("Validación", cm_val), ("Validación Ajustada", cm_thres)]
+    if tags is None:
+        tags = ['Prueba', 'Prueba Ajustada']
+    cm_val = confusion_matrix(y_true, y_pred_model_1)
+    cm_thres = confusion_matrix(y_true, y_pred_model_2)
+    matrices = [(tags[0], cm_val), (tags[1], cm_thres)]
 
     fig, axes = plt.subplots(1, ncols = 2, figsize=(12, 5))
 
