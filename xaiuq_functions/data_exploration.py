@@ -52,6 +52,7 @@ def inspect_column(df: pd.DataFrame, column_name: str, max_unique: int = 50) -> 
         "total_unique_values": len(unique_vals),
         "skew": df[column_name].skew(),
     }
+
     info_dict.update(desc_dict)
 
     df_result = pd.DataFrame(
@@ -100,6 +101,7 @@ def inspect_all_columns(df: pd.DataFrame, max_unique: int = 50) -> pd.DataFrame:
             "total_unique_values": len(unique_vals),
             "skew": col_data.skew() if np.issubdtype(data_type, np.number) else None,
         }
+
         row_dict.update(desc_dict)
 
         rows.append(row_dict)

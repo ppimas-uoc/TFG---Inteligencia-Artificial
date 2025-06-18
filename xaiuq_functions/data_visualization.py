@@ -626,7 +626,8 @@ def viz_pdp_pairs(model, X, features, kind='average', cols=2):
     n = len(features)
     rows = -(-n // cols)
     fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5 * rows))
-    axes = axes.flatten()
+    if cols > 1:
+        axes = axes.flatten()
 
     display = PartialDependenceDisplay.from_estimator(
         model,

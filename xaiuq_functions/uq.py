@@ -1,6 +1,7 @@
 from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score, roc_auc_score, brier_score_loss, log_loss
 import pandas as pd
-from IPython.display import display
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def compute_metrics(metrics_list, y_true):
     """
@@ -32,11 +33,7 @@ def compute_metrics(metrics_list, y_true):
     df = pd.DataFrame(rows).set_index('Model').round(3)
     return df
 
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-def conformal_probabilities(threshold, h_prob_df, highlight_cases=None, epsilon=0.15, alpha=0.1):
+def conformal_probabilities(threshold, h_prob_df, highlight_cases=None, epsilon=0.15):
     """
     Plot conformal intervals wider than epsilon and highlight selected cases.
 
@@ -59,7 +56,6 @@ def conformal_probabilities(threshold, h_prob_df, highlight_cases=None, epsilon=
         .reset_index(drop=True)
     )
     df2 = df[df['interval_width'] > epsilon].reset_index(drop=True)
-    idx_thr2 = df2.index[df2['p_ivap'] >= threshold][0]
 
     sns.set_style('whitegrid')
     palette = sns.color_palette("viridis", 30)
@@ -71,11 +67,7 @@ def conformal_probabilities(threshold, h_prob_df, highlight_cases=None, epsilon=
     ax.scatter(df2.index, df2['p_ivap'],       s=50,  color=palette[10], alpha=0.9, label='p unificado')
     ax.scatter(df2.index, df2['QoL'],         s=30,  color=palette[7],  alpha=0.9, label='valor real')
     ax.step(   df2.index, df2['interval_width'], where='mid', lw=1.5, color=palette[25], label='intervalo')
-
-    ax.axhline(epsilon, color='red', linestyle='--', label=f'ε = {epsilon}')
-    ax.axhline(alpha,   color='orange', linestyle='-.', label=f'α = {alpha}')
     ax.axhline(threshold, color='red', linewidth=1.5, alpha=0.5,      label=f'threshold = {threshold:.2f}')
-    ax.axvline(idx_thr2,   color='black', linewidth=1.5, linestyle=':', alpha=0.5, label=f'thr idx = {idx_thr2}')
 
     for row, lbl in highlight_cases:
         pos = df2.index[df2['orig_idx'] == row.name]
@@ -84,7 +76,7 @@ def conformal_probabilities(threshold, h_prob_df, highlight_cases=None, epsilon=
             ax.scatter(i, df2.loc[i, 'p_mid'], s=200, marker='X', edgecolor='black', facecolor='white', label=lbl)
             ax.annotate(lbl, (i, df2.loc[i, 'p_mid']), textcoords="offset points", xytext=(5,5))
 
-    ax.set_xlabel('Conjunto de prueba ordenado por p unificado (intervalo > ε)')
+    ax.set_xlabel(f'Conjunto de prueba ordenado por p unificado (intervalo > ε {epsilon})')
     ax.set_ylabel('Probabilidad')
     ax.set_xticks([])
     ax.legend(loc='upper left', fontsize=10, ncol=2)
